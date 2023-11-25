@@ -15,8 +15,6 @@ class BankMarketingGUI:
         self.root.resizable(False, False)
 
         pastel_blue = "#add8e6"
-        pastel_pink = "#ffb6c1"
-        pastel_ungprem = "#d8b7cf"
 
         self.root.configure(bg=pastel_blue)
     
@@ -50,7 +48,6 @@ class BankMarketingGUI:
         # Membuat frame untuk login
         login_frame = ttk.Frame(self.root)
         login_frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
-        # login_frame.pack(pady=50, expand=True, fill=tk.BOTH)
 
         # Label untuk judul (Welcome!)
         title_label = ttk.Label(login_frame, text="Welcome!", font=("Helvetica", 20, "bold"))
@@ -110,7 +107,7 @@ class BankMarketingGUI:
         # Membuat jendela baru untuk menampilkan data
         new_window = tk.Toplevel(self.root)
         new_window.title("Tampilkan Data")
-
+        
         # Menggunakan PandasTable untuk menampilkan data dengan lebih baik
         frame = ttk.Frame(new_window)
         frame.pack(fill=tk.BOTH, expand=True)
@@ -121,9 +118,11 @@ class BankMarketingGUI:
         # Membuat jendela baru untuk menambah data
         new_window = tk.Toplevel(self.root)
         new_window.title("Tambah Data")
+        new_window.geometry("250x200")
+        new_window.resizable(False, False)
 
         # Label dan entry untuk setiap kolom
-        columns = ["Nama", "Umur", "Pekerjaan", "No_Telp", "Status", "Alamat"]
+        columns = ["Nama", "Umur", "Pekerjaan", "No.Telepon", "Status", "Alamat"]
         entries = []
         for i, column in enumerate(columns):
             ttk.Label(new_window, text=column).grid(row=i, column=0, padx=10, pady=5)
@@ -151,6 +150,8 @@ class BankMarketingGUI:
         # Membuat jendela baru untuk memperbarui data
         new_window = tk.Toplevel(self.root)
         new_window.title("Perbarui Data")
+        new_window.geometry("330x330")
+        new_window.resizable(False, False)
 
         # Membuat label dan entry untuk nomor baris yang akan diperbarui
         ttk.Label(new_window, text="Nomor Baris:").grid(row=0, column=0, padx=10, pady=5)
