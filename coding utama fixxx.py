@@ -10,7 +10,7 @@ import pandas as pd
 class BankMarketingGUI:
     def __init__(self, root):
         self.root = root
-        self.root.title("Sistem Data Nasabah Bank Q")
+        self.root.title("Sistem Data Nasabah Bank ABC")
         self.root.geometry("450x400")
         self.root.resizable(False, False)
 
