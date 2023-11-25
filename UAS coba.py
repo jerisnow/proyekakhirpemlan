@@ -7,7 +7,7 @@ def login():
     password = password_entry.get()
 
     # Cek jika username dan password sesuai
-    if username == "admin" and password == "password":
+    if username == "admin" and password == "2222":
         messagebox.showinfo("Login", "Login berhasil!")
         create_main_menu()  # Panggil fungsi pembuatan menu utama setelah login berhasil
     else:
