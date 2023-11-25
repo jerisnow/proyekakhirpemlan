@@ -15,8 +15,6 @@ class BankMarketingGUI:
         self.root.resizable(False, False)
 
         pastel_blue = "#add8e6"
-        pastel_pink = "#ffb6c1"
-        pastel_ungprem = "#d8b7cf"
 
         self.root.configure(bg=pastel_blue)
     
