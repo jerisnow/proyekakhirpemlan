@@ -1,5 +1,7 @@
 import tkinter as tk
+import logging
 from tkinter import ttk
+from tkinter import *
 from tkinter import messagebox
 from pandastable import Table
 import os
@@ -8,8 +10,16 @@ import pandas as pd
 class BankMarketingGUI:
     def __init__(self, root):
         self.root = root
-        self.root.title("Bank Marketing GUI")
+        self.root.title("Sistem Data Nasabah Bank Q")
+        self.root.geometry("450x400")
+        self.root.resizable(False, False)
 
+        pastel_blue = "#add8e6"
+        pastel_pink = "#ffb6c1"
+        pastel_ungprem = "#d8b7cf"
+
+        self.root.configure(bg=pastel_blue)
+    
         # Nama file CSV untuk menyimpan data
         self.filename = 'bank-additional-full.csv'
 
@@ -36,23 +46,29 @@ class BankMarketingGUI:
         return pd.DataFrame()
 
     def login_frame(self):
+
         # Membuat frame untuk login
         login_frame = ttk.Frame(self.root)
-        login_frame.pack(pady=50)
+        login_frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+        # login_frame.pack(pady=50, expand=True, fill=tk.BOTH)
 
+        # Label untuk judul (Welcome!)
+        title_label = ttk.Label(login_frame, text="Welcome!", font=("Helvetica", 20, "bold"))
+        title_label.grid(row=0, column=0, columnspan=2, pady=(10, 15))
+        
         # Label dan entry untuk username
-        ttk.Label(login_frame, text="Username:").grid(row=0, column=0, padx=10, pady=5)
+        ttk.Label(login_frame, text="Username:", font=("Helvetica", 10)).grid(row=1, column=0, padx=10, pady=5)
         self.username_entry = ttk.Entry(login_frame)
-        self.username_entry.grid(row=0, column=1, padx=10, pady=5)
+        self.username_entry.grid(row=1, column=1, padx=15, pady=10)
 
         # Label dan entry untuk password
-        ttk.Label(login_frame, text="Password:").grid(row=1, column=0, padx=10, pady=5)
+        ttk.Label(login_frame, text="Password:", font=("Helvetica", 10)).grid(row=2, column=0, padx=10, pady=5)
         self.password_entry = ttk.Entry(login_frame, show="*")
-        self.password_entry.grid(row=1, column=1, padx=10, pady=5)
+        self.password_entry.grid(row=2, column=1, padx=15, pady=10)
 
         # Tombol login
         login_button = ttk.Button(login_frame, text="Login", command=self.login)
-        login_button.grid(row=2, column=0, columnspan=2, pady=10)
+        login_button.grid(row=3, column=0, columnspan=2, pady=10)
 
     def login(self):
         # Memeriksa login (contoh sederhana)
@@ -67,6 +83,10 @@ class BankMarketingGUI:
         for widget in self.root.winfo_children():
             widget.destroy()
 
+        # Membuat frame baru
+        frame = ttk.Frame(self.root)
+        frame.pack(expand=True, fill='both', padx=10, pady=10)
+
         # Membuat tombol-tombol untuk setiap fitur pada frame utama
         buttons = [
             ("Tampilkan Data", self.display_data),
@@ -78,10 +98,13 @@ class BankMarketingGUI:
             ("Keluar", self.exit_app)
         ]
 
-        row = 0
         for text, command in buttons:
-            ttk.Button(self.root, text=text, command=command).grid(row=row, column=0, padx=10, pady=5, sticky='ew')
-            row += 1
+            button = ttk.Button(frame, text=text, command=command)
+            button.pack(side=tk.TOP, anchor=tk.CENTER, pady=5, fill=tk.X)
+
+        # Membuat frame agar berada di tengah
+        frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+
 
     def display_data(self):
         # Membuat jendela baru untuk menampilkan data
@@ -251,7 +274,16 @@ class BankMarketingGUI:
         text.pack()
 
     def exit_app(self):
-        self.root.destroy() 
+        msg = messagebox.askquestion("Confirm", "ARE YOU SURE YOU WANT TO EXIT?", icon='warning')
+        if msg == "yes":
+            self.root.deiconify()  # makes the root window visible again
+            self.root.destroy()
+            logging.info('Exiting window')
+        else:
+            logging.info('Window still running')
+
+
+        
 
 if __name__ == "__main__":
     root = tk.Tk()
