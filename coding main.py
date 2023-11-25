@@ -118,16 +118,16 @@ class BankMarketingGUI:
         # Membuat jendela baru untuk menambah data
         new_window = tk.Toplevel(self.root)
         new_window.title("Tambah Data")
-        new_window.geometry("250x200")
+        new_window.geometry("250x250")
         new_window.resizable(False, False)
 
         # Label dan entry untuk setiap kolom
         columns = ["Nama", "Umur", "Pekerjaan", "No.Telepon", "Status", "Alamat"]
         entries = []
         for i, column in enumerate(columns):
-            ttk.Label(new_window, text=column).grid(row=i, column=0, padx=10, pady=5)
-            entry = ttk.Entry(new_window)
-            entry.grid(row=i, column=1, padx=10, pady=5)
+            ttk.Label(new_window, text=column, anchor="w").grid(row=i, column=0, padx=10, pady=5, sticky="w")
+            entry = ttk.Entry(new_window, justify="center")
+            entry.grid(row=i, column=1, padx=10, pady=5, sticky="ew")
             entries.append(entry)
 
         # Tombol untuk menambah data
@@ -150,7 +150,7 @@ class BankMarketingGUI:
         # Membuat jendela baru untuk memperbarui data
         new_window = tk.Toplevel(self.root)
         new_window.title("Perbarui Data")
-        new_window.geometry("330x330")
+        new_window.geometry("250x250")
         new_window.resizable(False, False)
 
         # Membuat label dan entry untuk nomor baris yang akan diperbarui
