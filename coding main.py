@@ -15,11 +15,13 @@ class BankMarketingGUI:
         self.root.resizable(False, False)
 
         pastel_blue = "#add8e6"
+        pastel_pink = "#ffb6c1"
+        pastel_ungprem = "#d8b7cf"
 
         self.root.configure(bg=pastel_blue)
     
         # Nama file CSV untuk menyimpan data
-        self.filename = 'bank-additional-full.csv'
+        self.filename = 'new-bank.csv'
 
         # Buat file CSV jika tidak ada
         self.create_csv_file()
@@ -33,7 +35,7 @@ class BankMarketingGUI:
     def create_csv_file(self):
         if not os.path.exists(self.filename):
             # Membuat file CSV dengan header
-            df = pd.DataFrame(columns=["Age", "Job", "Marital", "Education"])
+            df = pd.DataFrame(columns=["Nama", "Umur", "Pekerjaan", "No_Telp", "Status", "Alamat"])
             df.to_csv(self.filename, index=False)
 
     def import_data_from_csv(self):
@@ -70,7 +72,7 @@ class BankMarketingGUI:
 
     def login(self):
         # Memeriksa login (contoh sederhana)
-        if self.username_entry.get() == "admin" and self.password_entry.get() == "2222":
+        if self.username_entry.get() == "root" and self.password_entry.get() == "2222":
             # Menampilkan frame utama setelah login sukses
             self.show_main_frame()
         else:
@@ -98,7 +100,7 @@ class BankMarketingGUI:
 
         for text, command in buttons:
             button = ttk.Button(frame, text=text, command=command)
-            button.pack(side=tk.TOP, anchor=tk.CENTER, pady=5, fill=tk.X)
+            button.pack(side=tk.TOP, anchor=tk.CENTER, pady=10, padx=70, fill=tk.X)
 
         # Membuat frame agar berada di tengah
         frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
@@ -112,7 +114,7 @@ class BankMarketingGUI:
         # Menggunakan PandasTable untuk menampilkan data dengan lebih baik
         frame = ttk.Frame(new_window)
         frame.pack(fill=tk.BOTH, expand=True)
-        pt = Table(frame, dataframe=self.data, showtoolbar=True, showstatusbar=True, editable=False)
+        pt = Table(frame, dataframe=self.data, showtoolbar=False, showstatusbar=True, editable=False)
         pt.show()
 
     def add_data(self):
@@ -121,7 +123,7 @@ class BankMarketingGUI:
         new_window.title("Tambah Data")
 
         # Label dan entry untuk setiap kolom
-        columns = ["Age", "Job", "Marital", "Education"]
+        columns = ["Nama", "Umur", "Pekerjaan", "No_Telp", "Status", "Alamat"]
         entries = []
         for i, column in enumerate(columns):
             ttk.Label(new_window, text=column).grid(row=i, column=0, padx=10, pady=5)
@@ -155,7 +157,7 @@ class BankMarketingGUI:
         row_entry = ttk.Entry(new_window)
         row_entry.grid(row=0, column=1, padx=10, pady=5)
 
-        labels = ["Usia Baru (Age):", "Pekerjaan Baru (Job):", "Status Pernikahan Baru (Marital):", "Riwayat Pendidikan Baru (Education):"]
+        labels = ["Mengganti Nama:","Umur Baru:", "Mengganti Pekerjaan:", "Mengganti No.Telepon:", "Mengganti Status:","Mengubah Alamat:"]
         entries = []
 
         # Membuat label dan entry untuk setiap kolom baru
@@ -222,34 +224,103 @@ class BankMarketingGUI:
         new_window = tk.Toplevel(self.root)
         new_window.title("Cari Data")
 
+        buttons = [
+            ("Nama", self.search_name),
+            ("Umur", self.search_age),
+            ("Pekerjaan", self.search_job),
+        ]
+
+        row = 0
+        for text, command in buttons:
+            ttk.Button(new_window, text=text, command=command).grid(row=row, column=0, padx=10, pady=5, sticky='ew')
+            row += 1
+
+    def search_age(self):
+        # Membuat jendela baru untuk mencari data
+        new_window = tk.Toplevel(self.root)
+        new_window.title("Cari Data (Umur)")
+
         # Membuat label dan entry untuk usia yang akan dicari
         ttk.Label(new_window, text="Usia (Age):").grid(row=0, column=0, padx=10, pady=5)
         age_entry = ttk.Entry(new_window)
         age_entry.grid(row=0, column=1, padx=10, pady=5)
 
-        submit_button = ttk.Button(new_window, text="Cari Data", command=lambda: self.submit_search(age_entry.get()))
+        submit_button = ttk.Button(new_window, text="Cari Data", command=lambda: self.submit_search(age = age_entry.get()))
+        submit_button.grid(row=1, column=0, columnspan=2, pady=10)
+    
+    def search_name(self):
+        # Membuat jendela baru untuk mencari data
+        new_window = tk.Toplevel(self.root)
+        new_window.title("Cari Data (Nama)")
+
+        # Membuat label dan entry untuk usia yang akan dicari
+        ttk.Label(new_window, text="Nama (Name):").grid(row=0, column=0, padx=10, pady=5)
+        name_entry = ttk.Entry(new_window)
+        name_entry.grid(row=0, column=1, padx=10, pady=5)
+
+        submit_button = ttk.Button(new_window, text="Cari Data", command=lambda: self.submit_search(name = name_entry.get()))
         submit_button.grid(row=1, column=0, columnspan=2, pady=10)
 
-    def submit_search(self, age):
-        # Membuat jendela baru untuk menampilkan hasil pencarian
+    def search_job(self):
+        # Membuat jendela baru untuk mencari data
         new_window = tk.Toplevel(self.root)
-        new_window.title("Hasil Pencarian")
+        new_window.title("Cari Data (Pekerjaan)")
 
-        text = tk.Text(new_window)
-        text.insert(tk.END, f"Data dengan usia {age} adalah:\n\n")
-        count = 0
-        for index, row in self.data.iterrows():
-            if str(age) == str(row['Age']):
-                count += 1
-                text.insert(tk.END, f"Data ke-{count}\n")
-                for col, value in row.iteritems():
-                    text.insert(tk.END, f"{col}: {value}\n")
-                text.insert(tk.END, "\n")
-        if count == 0:
-            text.insert(tk.END, "Data tidak ditemukan.")
-        text.insert(tk.END, f"Jumlah data: {count}\n")
-        text.config(state=tk.DISABLED)
-        text.pack()
+        # Membuat label dan entry untuk usia yang akan dicari
+        ttk.Label(new_window, text="Pekerjaan (Job):").grid(row=0, column=0, padx=10, pady=5)
+        job_entry = ttk.Entry(new_window)
+        job_entry.grid(row=0, column=1, padx=10, pady=5)
+
+        submit_button = ttk.Button(new_window, text="Cari Data", command=lambda: self.submit_search(job = job_entry.get()))
+        submit_button.grid(row=1, column=0, columnspan=2, pady=10)
+    
+    def submit_search(self=None, name=None, age=None, job=None):
+
+
+        eror = 0
+
+        if not age and not name and not job:
+            filtered_data = self.data
+
+        elif age is not None:
+            try:
+                filtered_data = self.data[self.data['umur'] == int(age)]
+            except ValueError:
+                eror = 1
+                messagebox.showerror("Error", "Masukan harus angka")
+
+            print(age)
+            
+        
+        elif name is not None:
+            filtered_data = self.data[self.data['nama'] == name]
+
+            print(age)
+        
+        elif job is not None:
+            filtered_data = self.data[self.data['pekerjaan'] == job]
+
+            print(job)
+        
+        
+
+        if eror == 0:
+            print(eror == True)
+            
+            if filtered_data.empty:
+                messagebox.showerror("Error", "Data tidak ditemukan")
+            else:
+                # Membuat jendela baru untuk menampilkan hasil pencarian
+                new_window = tk.Toplevel(self.root)
+                new_window.title("Hasil Pencarian")
+                
+                # Create a frame
+                frame = tk.Frame(new_window)
+                frame.pack(fill='both', expand=True)
+                
+                # Create a PandasTable widget
+                table = Table(frame, dataframe=filtered_data, showtoolbar=True, showstatusbar=True, editable=False)
+                table.show()
 
     def show_help(self):
         # Membuat jendela baru untuk menampilkan pusat bantuan
@@ -279,9 +350,6 @@ class BankMarketingGUI:
             logging.info('Exiting window')
         else:
             logging.info('Window still running')
-
-
-        
 
 if __name__ == "__main__":
     root = tk.Tk()
