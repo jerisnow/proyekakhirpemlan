@@ -374,15 +374,28 @@ class MultiThreadedServer:
         print("Connection closed.")
 
     def process_request(self, request):
-        # Process the client's request here
-        # You may want to call the relevant methods in BankMarketingGUI class
-        # and return the response accordingly.
-        return "Response from server"
+    
+    # Process the client's request here
+    # You may want to call the relevant methods in BankMarketingGUI class
+    # and return the response accordingly.
+
+        if request == "DISPLAY_DATA":
+            # Example: Display data and send the result back to the client
+            response = str(self.bank_gui.data)
+        elif request == "ADD_DATA":
+            # Example: Add data and send a success message back to the client
+            self.bank_gui.add_data_to_dataframe(["John", "25", "Engineer", "123456789", "Single", "123 Main St"])
+            response = "Data added successfully"
+        else:
+            response = "Unknown command"
+
+        return response
+
 
 if __name__ == '__main__':
     root = tk.Tk()
     app = BankMarketingGUI(root)
-    server = MultiThreadedServer("192.168.201.17", 5000, app)
+    server = MultiThreadedServer("10.200.18.137", 5000, app)
     server_thread = threading.Thread(target=server.start_server)
     server_thread.start()
     root.mainloop()
