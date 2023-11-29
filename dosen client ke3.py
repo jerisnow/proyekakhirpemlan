@@ -31,6 +31,13 @@ class BankClientGUI:
         data = self.client_socket.recv(1024).decode()
         return pd.read_json(data, orient='split')
 
+    def export_data(self):
+        self.send_data_to_server("export_data")
+        response = self.receive_data_from_server()
+        if response == 'ready':
+            new_data = self.receive_data_from_server()
+            self.data = pd.concat([self.data, new_data])
+
     def setup_gui(self):
         ttk.Button(self.root, text="Display Data", command=self.display_data).pack(pady=10)
         ttk.Button(self.root, text="Add Data", command=self.add_data).pack(pady=10)
