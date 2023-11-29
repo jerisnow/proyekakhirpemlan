@@ -76,9 +76,19 @@ class BankClient:
         threading.Thread(target=self.import_data).start()
 
     def export_data(self):
-        pass # masih bingung
+        self.c.sendall(b'export_data')
+        response = self.c.recv(1024).decode()
+        if response == 'ready':
+            data = self.c.recv(4096).decode()
+            new_data = pd.read_csv(pd.compat.StringIO(data))
+            self.data = pd.concat([self.data, new_data])
+    
     def import_data(self):
-        pass # bingung juga
+        self.c.sendall(b'import_data')
+        response = self.c.recv(1024).decode()
+        if response == 'ready':
+            self.c.sendall(self.data.to_csv(index=False).encode())
+            messagebox.showinfo("import", "data synced.")
 
     def add_data(self):
         self.c.sendall(b'add_data')
