@@ -78,7 +78,7 @@ class BankClientGUI:
             entry = ttk.Entry(new_window)
             entry.grid(row=i+1, column=1, padx=10, pady=5, sticky="ew")
             entries.append(entry)
-        submit_button = ttk.Button(new_window, text="Perbarui Data", command=lambda: self.send_data_to_server((row_entry.get(), entries))
+        submit_button = ttk.Button(new_window, text="Perbarui Data", command=lambda: self.send_data_to_server((row_entry.get(), entries)))
         submit_button.grid(row=len(labels)+1, column=0, columnspan=2, pady=10)
 
     def delete_data(self):
