@@ -15,6 +15,8 @@ class BankServer:
         self.export_lock = threading.Lock()
         self.import_lock = threading.Lock()
 
+        self.filename = 'new-bank.csv'
+
     def run_server(self):
         print("Server is running.")
         while True:
@@ -36,7 +38,7 @@ class BankServer:
 
     def add_data(self, c_socket):
         data = c_socket.recv(1024).decode()
-        value = [entry.get() for entry in data]
+        value = [data.split(',')]
 
         new_data = pd.DataFrame([value], columns = self.data.columns)
         self.data = pd.concat([self.data, new_data], ignore_index=True)
@@ -46,9 +48,9 @@ class BankServer:
     def update_data(self, c_socket):
         data = c_socket.recv(1024).decode()
         try:
-            row_index = int(row)
+            row_index = int(row) # masih perlu dibenerin ini error disini
             if 0 < row_index < len(self.data) +1:
-                value = [entry.get() for entry in data]
+                value = [data.split(',')]
                 for i, col in enumerate(self.data.columns):
                     self.data.at[row_index - 1, col] = value
                 self.data.to_csv(self.filename, index=False)
