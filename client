@@ -1,5 +1,5 @@
-# client code (unfinished)
-# kalo mau edit lgsg disini aja klik tanda pensil di kanan atas
+# server code (unfinished)
+# kalo mau lgsg edit disini aja pencet gambar pensil di kanan atas
 
 import tkinter as tk
 from tkinter import ttk
@@ -76,9 +76,9 @@ class BankClient:
         threading.Thread(target=self.import_data).start()
 
     def export_data(self):
-        pass
+        pass # masih bingung
     def import_data(self):
-        pass
+        pass # bingung juga
 
     def add_data(self):
         self.c.sendall(b'add_data')
@@ -117,11 +117,20 @@ class BankClient:
             entry = ttk.Entry(new_window)
             entry.grid(row=i+1, column=1, padx=10, pady=5, sticky="ew")
             entries.append(entry)
-        submit_button = ttk.Button(new_window, text="Perbarui Data", command=lambda: self.send_server(row_entry.get(), entries))
+        submit_button = ttk.Button(new_window, text="Perbarui Data", command=lambda: self.send_to_server(row_entry.get(), entries))
         submit_button.grid(row=len(labels)+1, column=0, columnspan=2, pady=10)
 
         # response = self.c.recv(1024).decode()
         # messagebox.showerror("Perbarui data", response)
+    def send_to_server(self, row_entry, entries):
+        row = row_entry.get()
+        data_parts = [entry.get() for entry in entries]
+        data = f"ADD_DATA|{'|'.join(data_parts)}"
+
+        self.c.send(row.encode())
+        self.c.send(data.encode())
+        response = self.c.recv(1024).decode()
+        messagebox.showinfo("Information", response)
 
     def delete_data(self):
         self.c.sendall(b'delete_data')
