@@ -10,7 +10,7 @@ class BankServer:
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_socket.bind((self.host, self.port))
         self.server_socket.listen(5)
-        self.filename = 'server-bank.csv'
+        self.filename = 'new-bank.csv'
         self.create_csv_file()
 
     def create_csv_file(self):
@@ -37,11 +37,11 @@ class BankServer:
             if data == "display_data":
                 self.send_data_to_client(client_socket)
             elif data == "add_data":
-                self.receive_data_from_client(client_socket)
+                self.receive_data_and_update("add_data", client_socket)
             elif data == "update_data":
-                self.receive_data_from_client(client_socket)
+                self.receive_data_and_update(client_socket)
             elif data == "delete_data":
-                self.receive_data_from_client(client_socket)
+                self.receive_data_and_update(client_socket)
             elif data.startswith("search_data"):
                 self.send_search_results_to_client(client_socket, data.split(":")[1])
             elif data == "exit_app":
@@ -54,14 +54,17 @@ class BankServer:
         serialized_data = data.to_json(orient='split')
         client_socket.send(serialized_data.encode())
 
-    def receive_data_from_client(self, client_socket):
+    # Modifikasi receive_data_and_update method
+    def receive_data_and_update(self, operation, client_socket):
+        # Receive data from the client
         data = client_socket.recv(1024).decode()
         received_data = pd.read_json(data, orient='split')
 
-        current_data = self.import_data_from_csv()
-        updated_data = pd.concat([current_data, received_data], ignore_index=True)
-
-        self.export_data_to_csv(updated_data)
+        # Perform the requested operation
+        if operation == "add_data":
+            current_data = self.import_data_from_csv()
+            updated_data = pd.concat([current_data, received_data], ignore_index=True)
+            self.export_data_to_csv(updated_data)
 
     def send_search_results_to_client(self, client_socket, search_term):
         data = self.import_data_from_csv()
