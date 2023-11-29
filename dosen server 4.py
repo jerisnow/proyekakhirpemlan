@@ -26,6 +26,14 @@ class BankServer:
 
     def export_data_to_csv(self, data):
         data.to_csv(self.filename, index=False)
+    
+    def send_csv_to_client(self, client_socket):
+        try:
+            with open(self.filename, 'rb') as file:
+                data = file.read()
+                client_socket.send(data)
+        except FileNotFoundError:
+            client_socket.send(b'')
 
     def handle_client(self, client_socket):
         while True:
@@ -44,6 +52,8 @@ class BankServer:
                 self.receive_data_and_update("delete_data", client_socket)
             elif data.startswith("search_data"):
                 self.send_search_results_to_client(client_socket, data.split(":")[1])
+            elif data == "get_csv":
+                self.send_csv_to_client(client_socket)
             elif data == "exit_app":
                 break
 
