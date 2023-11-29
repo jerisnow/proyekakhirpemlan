@@ -72,6 +72,5 @@ class BankServer:
             data = c_socket.sendall(b'Masukkan nomor yang valid.')
 
 if __name__ == "__main__":
-    root = tk.Tk()
-    app = BankServer(root)
-    root.mainloop()
+    server = BankServer()
+    server.run_server()
