@@ -61,8 +61,25 @@ class BankClientGUI:
         ttk.Button(new_window, text="Tambah Data", command=lambda: self.send_data_to_server(entries)).grid(row=len(columns), column=0, columnspan=2, pady=10)
         
     def update_data(self):
-        # Implement the update data functionality
-        pass
+        self.send_data_to_server("update_data")
+        new_window = tk.Toplevel(self.root)
+        new_window.title("Perbarui Data")
+        new_window.geometry("300x280")
+        new_window.resizable(False, False)
+
+        ttk.Label(new_window, text="Nomor Baris:", anchor="w").grid(row=0, column=0, padx=10, pady=5, sticky="w")
+        row_entry = ttk.Entry(new_window)
+        row_entry.grid(row=0, column=1, padx=10, pady=5, sticky="ew")
+
+        labels = ["Mengganti Nama:","Umur Baru:", "Mengganti Pekerjaan:", "Mengganti No.Telepon:", "Mengganti Status:","Mengubah Alamat:"]
+        entries = []
+        for i, label in enumerate(labels):
+            ttk.Label(new_window, text=label, anchor="w").grid(row=i+1, column=0, padx=10, pady=5, sticky="w")
+            entry = ttk.Entry(new_window)
+            entry.grid(row=i+1, column=1, padx=10, pady=5, sticky="ew")
+            entries.append(entry)
+        submit_button = ttk.Button(new_window, text="Perbarui Data", command=lambda: self.send_data_to_server((row_entry.get(), entries))
+        submit_button.grid(row=len(labels)+1, column=0, columnspan=2, pady=10)
 
     def delete_data(self):
         self.send_data_to_server("delete_data")
