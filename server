@@ -1,0 +1,43 @@
+# server code (unfinished)
+
+import socket
+import threading
+import pandas as pd
+
+class BankServer:
+    def __init__(self):
+        self.data = pd.DataFrame(columns=["Nama", "Umur", "Pekerjaan", "No_Telp", "Status", "Alamat"])
+        self.address = (socket.gethostname(), 5000)
+        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.s.bind(self.address)
+        self.s.listen(5)
+        self.export_lock = threading.Lock()
+        self.import_lock = threading.Lock()
+
+    def run_server(self):
+        print("Server is running.")
+        while True:
+            c_socket, c_address = self.s.accept()
+            threading.Thread(target=self.handle_client, args=(c_socket,)).start()
+
+    def handle_client(self, c_socket):
+        with c_socket:
+            print(f"Conection from {str(self.c_address)}")
+
+        data = c_socket.recv(1024).decode()
+
+        if data == 'add_data':
+            self.add_data(c_socket)
+        elif data == 'update_data':
+            self.update_data(c_socket)
+        elif data == 'delete_data':
+            self.delete_data(c_socket)
+
+    def add_data(self, c_socket):
+        pass
+
+    def update_data(self, c_socket):
+        pass
+
+    def delete_data(self, c_socket):
+        pass
