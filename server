@@ -1,4 +1,5 @@
 # server code (unfinished)
+# kalo mau lgsg edit disini aja pencet gambar pensil di kanan atas
 
 import socket
 import threading
@@ -34,7 +35,11 @@ class BankServer:
             self.delete_data(c_socket)
 
     def add_data(self, c_socket):
-        pass
+        data = c_socket.recv(1024).decode()
+        value = [entry.get() for entry in data]
+
+        new_data = pd.DataFrame([value], columns = self.data.columns)
+        self.data = pd.concat([self.data, new_data], ignore_index=True)
 
     def update_data(self, c_socket):
         pass
