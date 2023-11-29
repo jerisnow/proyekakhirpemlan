@@ -2,7 +2,6 @@ import socket
 import threading
 import pandas as pd
 import os
-import logging
 
 class BankServer:
     def __init__(self, host, port):
@@ -11,12 +10,8 @@ class BankServer:
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_socket.bind((self.host, self.port))
         self.server_socket.listen(5)
-        self.filename = 'new-bank.csv'
+        self.filename = 'server-bank.csv'
         self.create_csv_file()
-
-        # Setup logging
-        logging.basicConfig(level=logging.DEBUG)
-        self.logger = logging.getLogger(__name__)
 
     def create_csv_file(self):
         if not os.path.exists(self.filename):
@@ -31,31 +26,38 @@ class BankServer:
 
     def export_data_to_csv(self, data):
         data.to_csv(self.filename, index=False)
+    
+    def send_csv_to_client(self, client_socket):
+        try:
+            with open(self.filename, 'rb') as file:
+                data = file.read()
+                client_socket.send(data)
+        except FileNotFoundError:
+            client_socket.send(b'')
 
     def handle_client(self, client_socket):
-        try:
-            while True:
-                data = client_socket.recv(1024).decode()
+        while True:
+            data = client_socket.recv(1024).decode()
 
-                if not data:
-                    break
+            if not data:
+                break
 
-                if data == "display_data":
-                    self.send_data_to_client(client_socket)
-                elif data == "add_data":
-                    self.receive_data_and_update("add_data", client_socket)
-                elif data == "update_data":
-                    self.receive_data_and_update("update_data", client_socket)
-                elif data == "delete_data":
-                    self.receive_data_and_update("delete_data", client_socket)
-                elif data.startswith("search_data"):
-                    self.send_search_results_to_client(client_socket, data.split(":")[1])
-                elif data == "exit_app":
-                    break
-        except Exception as e:
-            self.logger.error(f"An error occurred: {str(e)}")
-        finally:
-            client_socket.close()
+            if data == "display_data":
+                self.send_data_to_client(client_socket)
+            elif data == "add_data":
+                self.receive_data_and_update("add_data", client_socket)
+            elif data == "update_data":
+                self.receive_data_and_update("update_data", client_socket)
+            elif data == "delete_data":
+                self.receive_data_and_update("delete_data", client_socket)
+            elif data.startswith("search_data"):
+                self.send_search_results_to_client(client_socket, data.split(":")[1])
+            elif data == "get_csv":
+                self.send_csv_to_client(client_socket)
+            elif data == "exit_app":
+                break
+
+        client_socket.close()
 
     def send_data_to_client(self, client_socket):
         data = self.import_data_from_csv()
@@ -63,55 +65,43 @@ class BankServer:
         client_socket.send(serialized_data.encode())
 
     def receive_data_and_update(self, operation, client_socket):
-        try:
-            data = client_socket.recv(1024).decode()
-            received_data = pd.read_json(data, orient='split')
+        # Receive data from the client
+        data = client_socket.recv(4096).decode()
+        received_data = pd.read_json(data, orient='split')
 
-            if operation == "add_data":
-                current_data = self.import_data_from_csv()
-                updated_data = pd.concat([current_data, received_data], ignore_index=True)
-                self.export_data_to_csv(updated_data)
-            elif operation == "update_data":
-                row_index, updated_values = received_data.iloc[0, 0], received_data.iloc[0, 1:]
-                current_data = self.import_data_from_csv()
-
-                if 0 <= row_index < len(current_data):
-                    current_data.loc[row_index, :] = updated_values
-                    self.export_data_to_csv(current_data)
-                else:
-                    self.logger.error(f"Invalid row index: {row_index}")
-            elif operation == "delete_data":
-                row_index = received_data.iloc[0, 0]
-                current_data = self.import_data_from_csv()
-
-                if 0 <= row_index < len(current_data):
-                    current_data = current_data.drop(index=row_index).reset_index(drop=True)
-                    self.export_data_to_csv(current_data)
-                else:
-                    self.logger.error(f"Invalid row index: {row_index}")
-        except Exception as e:
-            self.logger.error(f"An error occurred during {operation}: {str(e)}")
+        # Perform the requested operation
+        if operation == "add_data":
+            current_data = self.import_data_from_csv()
+            updated_data = pd.concat([current_data, received_data], ignore_index=True)
+            self.export_data_to_csv(updated_data)
+        elif operation == "update_data":
+            # Assume the client sends both the original and updated rows
+            original_data, updated_data = received_data.iloc[0], received_data.iloc[1]
+            current_data = self.import_data_from_csv()
+            current_data = current_data.mask(current_data.eq(original_data)).fillna(updated_data)
+            self.export_data_to_csv(current_data)
+        elif operation == "delete_data":
+            current_data = self.import_data_from_csv()
+            current_data = current_data[~current_data.isin(received_data)].dropna()
+            self.export_data_to_csv(current_data)
 
     def send_search_results_to_client(self, client_socket, search_term):
-        try:
-            data = self.import_data_from_csv()
+        data = self.import_data_from_csv()
 
-            if search_term == "all":
-                search_results = data
-            else:
-                search_results = data[data['Nama'].str.contains(search_term, case=False)]
+        if search_term == "all":
+            search_results = data
+        else:
+            search_results = data[data['Nama'].str.contains(search_term, case=False)]
 
-            serialized_results = search_results.to_json(orient='split')
-            client_socket.send(serialized_results.encode())
-        except Exception as e:
-            self.logger.error(f"An error occurred during search_data: {str(e)}")
+        serialized_results = search_results.to_json(orient='split')
+        client_socket.send(serialized_results.encode())
 
     def start(self):
-        self.logger.info(f"Server listening on {self.host}:{self.port}")
+        print(f"Server listening on {self.host}:{self.port}")
 
         while True:
             client_socket, client_address = self.server_socket.accept()
-            self.logger.info(f"Accepted connection from {client_address}")
+            print(f"Accepted connection from {client_address}")
 
             client_handler = threading.Thread(target=self.handle_client, args=(client_socket,))
             client_handler.start()

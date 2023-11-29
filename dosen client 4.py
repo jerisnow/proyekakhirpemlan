@@ -30,6 +30,18 @@ class BankClientGUI:
     def receive_data_from_server(self):
         data = self.client_socket.recv(1024).decode()
         return pd.read_json(data, orient='split')
+    def receive_csv_from_server(self):
+        data = self.client_socket.recv(4096)
+        with open('client_data.csv', 'wb') as file:
+            file.write(data)
+
+    def get_csv_from_server(self):
+        self.send_data_to_server("get_csv")
+        self.receive_csv_from_server()
+        messagebox.showinfo("Info", "CSV file received and saved as 'client_data.csv'.")
+
+        # Tambahkan tombol atau perintah pada setup_gui
+        ttk.Button(self.root, text="Get CSV from Server", command=self.get_csv_from_server).pack(pady=10)
 
     def setup_gui(self):
         ttk.Button(self.root, text="Display Data", command=self.display_data).pack(pady=10)

@@ -1,5 +1,8 @@
 import socket
+import logging
+import os
 import tkinter as tk
+from tkinter import *
 from tkinter import ttk, messagebox
 import pandas as pd
 from pandastable import Table
@@ -10,8 +13,17 @@ class BankClientGUI:
         self.root.title("Sistem Data Nasabah Bank ABC")
         self.root.geometry("450x400")
         self.root.resizable(False, False)
-        pastel_blue = "#add8e6"
-        self.root.configure(bg=pastel_blue)
+        self.root.configure(bg="#add8e6")
+
+        # Calculate the center position of the screen
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+        window_width = 450
+        window_height = 400
+        x_position = (screen_width - window_width) // 2
+        y_position = (screen_height - window_height) // 2
+
+        self.root.geometry(f"{window_width}x{window_height}+{x_position}+{y_position}")
 
         self.host = "10.200.18.137"
         self.port = 5005
@@ -19,6 +31,7 @@ class BankClientGUI:
         self.create_connection()
 
         self.setup_gui()
+
 
     def create_connection(self):
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -30,103 +43,71 @@ class BankClientGUI:
     def receive_data_from_server(self):
         data = self.client_socket.recv(1024).decode()
         return pd.read_json(data, orient='split')
-        
+
     def setup_gui(self):
         ttk.Button(self.root, text="Display Data", command=self.display_data).pack(pady=10)
-        ttk.Button(self.root, text="Add Data", command=self.add_data).pack(pady=10)
+        ttk.Button(self.root, text="Tambah Data", command=self.add_data(self, entries)).pack(side=tk.TOP, anchor=tk.CENTER, pady=10, padx=70, fill=tk.X)
         ttk.Button(self.root, text="Update Data", command=self.update_data).pack(pady=10)
         ttk.Button(self.root, text="Delete Data", command=self.delete_data).pack(pady=10)
         ttk.Button(self.root, text="Search Data", command=self.search_data).pack(pady=10)
+        ttk.Button(self.root, text="Help", command=self.show_help).pack(pady=10)
         ttk.Button(self.root, text="Exit App", command=self.exit_app).pack(pady=10)
+
+        self.root.geometry("450x400")  # Set the size and position of the window
 
     def display_data(self):
         self.send_data_to_server("display_data")
         data = self.receive_data_from_server()
         self.show_data_table(data)
 
-    def add_data(self):
+    def add_data(self, entries):
+        # Mendapatkan nilai dari entry
+        values = [entry.get() for entry in entries]
+
+        # Mengirim perintah ke server untuk menambahkan data baru
         self.send_data_to_server("add_data")
-        new_window = tk.Toplevel(self.root)
-        new_window.title("Tambah Data")
-        new_window.geometry("250x250")
-        new_window.resizable(False, False)
+    
+        # Mengirim data baru ke server
+        new_data = pd.DataFrame([values], columns=self.data.columns)
+        self.send_data_to_server(new_data.to_json(orient='split'))
 
-        columns = ["Nama", "Umur", "Pekerjaan", "No.Telepon", "Status", "Alamat"]
-        entries = []
-        for i, column in enumerate(columns):
-            ttk.Label(new_window, text=column, anchor="w").grid(row=i, column=0, padx=10, pady=5, sticky="w")
-            entry = ttk.Entry(new_window)
-            entry.grid(row=i, column=1, padx=10, pady=5, sticky="ew")
-            entries.append(entry)
-        ttk.Button(new_window, text="Tambah Data", command=lambda: self.send_data_to_server(entries)).grid(row=len(columns), column=0, columnspan=2, pady=10)
-        
+        # Menampilkan pesan info (Opsional, tergantung kebutuhan)
+        messagebox.showinfo("Tambah Data", "Permintaan penambahan data telah dikirim ke server.")
+
+
     def update_data(self):
-        self.send_data_to_server("update_data")
-        new_window = tk.Toplevel(self.root)
-        new_window.title("Perbarui Data")
-        new_window.geometry("300x280")
-        new_window.resizable(False, False)
-
-        ttk.Label(new_window, text="Nomor Baris:", anchor="w").grid(row=0, column=0, padx=10, pady=5, sticky="w")
-        row_entry = ttk.Entry(new_window)
-        row_entry.grid(row=0, column=1, padx=10, pady=5, sticky="ew")
-
-        labels = ["Mengganti Nama:","Umur Baru:", "Mengganti Pekerjaan:", "Mengganti No.Telepon:", "Mengganti Status:","Mengubah Alamat:"]
-        entries = []
-        for i, label in enumerate(labels):
-            ttk.Label(new_window, text=label, anchor="w").grid(row=i+1, column=0, padx=10, pady=5, sticky="w")
-            entry = ttk.Entry(new_window)
-            entry.grid(row=i+1, column=1, padx=10, pady=5, sticky="ew")
-            entries.append(entry)
-        submit_button = ttk.Button(new_window, text="Perbarui Data", command=lambda: self.send_data_to_server((row_entry.get(), entries)))
-        submit_button.grid(row=len(labels)+1, column=0, columnspan=2, pady=10)
+        # Implement the update data functionality
+        pass
 
     def delete_data(self):
-        self.send_data_to_server("delete_data")
-        new_window = tk.Toplevel(self.root)
-        new_window.title("Hapus Data")
-        new_window.geometry("280x80")
-        new_window.resizable(False, False)
-
-        ttk.Label(new_window, text="Nomor Baris:").grid(row=0, column=0, padx=10, pady=5)
-        entries = ttk.Entry(new_window)
-        entries.grid(row=0, column=1, padx=10, pady=5)
-
-        submit_button = ttk.Button(new_window, text="Hapus Data", command=lambda: self.send_data_to_server(entries.get()))
-        submit_button.grid(row=1, column=0, columnspan=2, pady=10)
+        # Implement the delete data functionality
+        pass
 
     def search_data(self):
+        # Implement the search data functionality
+        pass
+
+    def show_help(self):
+        # Membuat jendela baru untuk menampilkan pusat bantuan
         new_window = tk.Toplevel(self.root)
-        new_window.title("Cari Data")
-        new_window.geometry("250x150")
-        new_window.resizable(False, False)
+        new_window.title("Pusat Bantuan")
+        help_text = (
+            "Pilihan 'Tampilkan Data' akan menampilkan seluruh data nasabah yang ada pada database.\n"
+            "Pilihan 'Tambah Data' akan memberi akses kepada admin untuk menambah data nasabah pada database.\n"
+            "Pilihan 'Perbarui Data' akan memberi akses kepada admin untuk memperbarui data nasabah yang sudah ada.\n"
+            "Pilihan 'Hapus Data' akan memberi akses kepada admin untuk menghapus data nasabah pada database.\n"
+            "Pilihan 'Cari Data' akan memberi akses kepada admin untuk mencari data nasabah sesuai nama, umur, dan pekerjaan.\n"
+            "Pilihan 'Help' akan menampilkan pusat bantuan.\n"
+            "Pilihan 'Keluar' akan keluar dari aplikasi."
+        )
+        # Membuat widget LabelFrame untuk menampilkan teks bantuan dengan lebih baik
+        help_frame = ttk.LabelFrame(new_window, text="Help", padding=(10, 10))
+        help_frame.pack(padx=20, pady=20)
 
-        buttons = [
-            ("Nama", self.search_about("Name")),
-            ("Umur", self.search_about("Age")),
-            ("Pekerjaan", self.search_about("Job")),
-        ]
+        # Membuat widget Label untuk menampilkan teks bantuan
+        help_label = ttk.Label(help_frame, text=help_text, justify=tk.LEFT, font=("Helvetica", 10))
+        help_label.grid(row=0, column=0, padx=10, pady=10)
 
-        frame = ttk.Frame(new_window)
-        frame.pack(expand=True, fill="both", pady=10)
-
-        for text, command in buttons:
-            ttk.Button(frame, text=text, command=command).pack(side=tk.TOP, anchor=tk.CENTER, pady=5)
-
-    def search_about(self, type):
-        self.send_data_to_server("search_data")
-        new_window = tk.Toplevel(self.root)
-        new_window.title(f"Cari Data ({type})")
-        new_window.geometry("250x100")
-        new_window.resizable(False, False)
-        
-        ttk.Label(new_window, text=f"{type}:", anchor="w").grid(row=0, column=0, padx=10, pady=5, sticky="w")
-        entry_var = tk.StringVar()
-        search_entry = ttk.Entry(new_window, textvariable=entry_var)
-        search_entry.grid(row=0, column=1, padx=10, pady=5)
-
-        submit_button = ttk.Button(new_window, text="Cari Data", command=lambda: self.send_data_to_server((type, entry_var.get()))
-        submit_button.grid(row=1, column=0, columnspan=2, pady=10)
 
     def exit_app(self):
         self.send_data_to_server("exit_app")
