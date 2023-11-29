@@ -45,20 +45,71 @@ class BankClientGUI:
         self.show_data_table(data)
 
     def add_data(self):
-        # Implement the add data functionality
-        pass
+        self.send_data_to_server("add_data")
+        new_window = tk.Toplevel(self.root)
+        new_window.title("Tambah Data")
+        new_window.geometry("250x250")
+        new_window.resizable(False, False)
 
+        columns = ["Nama", "Umur", "Pekerjaan", "No.Telepon", "Status", "Alamat"]
+        entries = []
+        for i, column in enumerate(columns):
+            ttk.Label(new_window, text=column, anchor="w").grid(row=i, column=0, padx=10, pady=5, sticky="w")
+            entry = ttk.Entry(new_window)
+            entry.grid(row=i, column=1, padx=10, pady=5, sticky="ew")
+            entries.append(entry)
+        ttk.Button(new_window, text="Tambah Data", command=lambda: self.send_data_to_server(entries)).grid(row=len(columns), column=0, columnspan=2, pady=10)
+        
     def update_data(self):
         # Implement the update data functionality
         pass
 
     def delete_data(self):
-        # Implement the delete data functionality
-        pass
+        self.send_data_to_server("delete_data")
+        new_window = tk.Toplevel(self.root)
+        new_window.title("Hapus Data")
+        new_window.geometry("280x80")
+        new_window.resizable(False, False)
+
+        ttk.Label(new_window, text="Nomor Baris:").grid(row=0, column=0, padx=10, pady=5)
+        entries = ttk.Entry(new_window)
+        entries.grid(row=0, column=1, padx=10, pady=5)
+
+        submit_button = ttk.Button(new_window, text="Hapus Data", command=lambda: self.send_data_to_server(entries.get()))
+        submit_button.grid(row=1, column=0, columnspan=2, pady=10)
 
     def search_data(self):
-        # Implement the search data functionality
-        pass
+        new_window = tk.Toplevel(self.root)
+        new_window.title("Cari Data")
+        new_window.geometry("250x150")
+        new_window.resizable(False, False)
+
+        buttons = [
+            ("Nama", self.search_about("Name")),
+            ("Umur", self.search_about("Age")),
+            ("Pekerjaan", self.search_about("Job")),
+        ]
+
+        frame = ttk.Frame(new_window)
+        frame.pack(expand=True, fill="both", pady=10)
+
+        for text, command in buttons:
+            ttk.Button(frame, text=text, command=command).pack(side=tk.TOP, anchor=tk.CENTER, pady=5)
+
+    def search_about(self, type):
+        self.send_data_to_server("search_data")
+        new_window = tk.Toplevel(self.root)
+        new_window.title(f"Cari Data ({type})")
+        new_window.geometry("250x100")
+        new_window.resizable(False, False)
+        
+        ttk.Label(new_window, text=f"{type}:", anchor="w").grid(row=0, column=0, padx=10, pady=5, sticky="w")
+        entry_var = tk.StringVar()
+        search_entry = ttk.Entry(new_window, textvariable=entry_var)
+        search_entry.grid(row=0, column=1, padx=10, pady=5)
+
+        submit_button = ttk.Button(new_window, text="Cari Data", command=lambda: self.send_data_to_server((type, entry_var.get()))
+        submit_button.grid(row=1, column=0, columnspan=2, pady=10)
 
     def exit_app(self):
         self.send_data_to_server("exit_app")
