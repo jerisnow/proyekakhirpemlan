@@ -38,6 +38,17 @@ class BankClientGUI:
             new_data = self.receive_data_from_server()
             self.data = pd.concat([self.data, new_data])
 
+    def import_data(self):
+        self.send_data_to_server("import_data")
+        response = self.receive_data_from_server()
+        if response == 'ready':
+            self.send_data_to_receiver(self.data.to_csv(index=False))
+            messagebox.showinfo("Import data", "Data synced.")
+
+    def sync_server(self):
+        threading.Thread(target=self.export_data).start()
+        threading.Thread(target=self.import_data).start()
+
     def setup_gui(self):
         ttk.Button(self.root, text="Display Data", command=self.display_data).pack(pady=10)
         ttk.Button(self.root, text="Add Data", command=self.add_data).pack(pady=10)
