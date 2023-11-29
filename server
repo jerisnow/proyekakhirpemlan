@@ -41,8 +41,37 @@ class BankServer:
         new_data = pd.DataFrame([value], columns = self.data.columns)
         self.data = pd.concat([self.data, new_data], ignore_index=True)
 
+        data = c_socket.sendall(b'Data berhasil ditambahkan.')
+
     def update_data(self, c_socket):
-        pass
+        data = c_socket.recv(1024).decode()
+        try:
+            row_index = int(row)
+            if 0 < row_index < len(self.data) +1:
+                value = [entry.get() for entry in data]
+                for i, col in enumerate(self.data.columns):
+                    self.data.at[row_index - 1, col] = value
+                self.data.to_csv(self.filename, index=False)
+                data = c_socket.sendall(b'Data berhasil diperbarui.')
+            else:
+                data = c_socket.sendall(b'Nomor baris tidak valid.')
+        except ValueError:
+            data = c_socket.sendall(b'Masukkan nomor yang valid.')
 
     def delete_data(self, c_socket):
-        pass
+        data = c_socket.recv(1024).decode()
+        try:
+            row = int(data)
+            if 0 < row < len(self.data) +1:
+                self.data = self.data.drop(index=row-1).reset_index(drop=True)
+                self.data.to_csv(self.filename, index=False)
+                data = c_socket.sendall(b'Data telah dihapus')
+            else:
+                data = c_socket.sendall(b'Nomor baris tidak valid.')
+        except ValueError:
+            data = c_socket.sendall(b'Masukkan nomor yang valid.')
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = BankServer(root)
+    root.mainloop()
