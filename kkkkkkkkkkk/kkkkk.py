@@ -76,9 +76,21 @@ class BankServer:
             if len(split_data) == len(columns) and any(split_data):
                 received_data = pd.DataFrame([split_data], columns=columns)
 
+                # Debugging: Print received data as DataFrame
+                print("Received data as DataFrame:")
+                print(received_data)
+                
                 # Perform the requested operation
                 if operation == "add_data":
+                    # Debugging: Print current data before adding
+                    print("Current data before adding:")
+                    print(self.import_data_from_csv())
+
                     self.add_data_to_dataframe(received_data)
+
+                    # Debugging: Print updated data after adding
+                    print("Updated data after adding:")
+                    print(self.import_data_from_csv())
             else:
                 print("Invalid data received.")
 
