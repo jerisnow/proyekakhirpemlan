@@ -136,6 +136,13 @@ class BankMarketingGUI:
 
     def submit_update(self, row, entries, new_window):
         try:
+            if not all(entry.get() for entry in entries):
+                raise ValueError("Semua kolom harus diisi.")
+        except ValueError as e:
+            messagebox.showerror("Error", f"{e}")
+            return
+
+        try:
             row_index = int(row)
             if 0 < row_index < len(self.data) + 1:
                 new_values = [entry.get() for entry in entries]
@@ -144,9 +151,9 @@ class BankMarketingGUI:
                 self.data.to_csv(self.filename, index=False)
                 messagebox.showinfo("Info", f"Data dengan nomor {row_index} berhasil diperbarui!")
             else:
-                messagebox.showerror("Error", "Nomor baris tidak valid.")
-        except ValueError:
-            messagebox.showerror("Error", "Masukkan nomor yang valid.")
+                raise ValueError("Nomor baris tidak valid.")
+        except ValueError as e:
+            messagebox.showerror("Error", f"{e}")
         new_window.destroy()
 
     def delete_data(self):
